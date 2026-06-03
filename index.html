@@ -632,7 +632,7 @@
   }
 
   // ── CONFIRM ORDER ──
-  function confirmarPedido() {
+  async function confirmarPedido() {
     const allItems = getAllItems();
     const itens = [];
     let total = 0;
@@ -670,7 +670,8 @@
       observacoes: obs ? obs.value.trim() : ''
     };
 
-    addPedido(pedido);
+    showToast('Enviando pedido...');
+    await addPedido(pedido);
     closeCart();
     cart = {};
     updateCartFab();
