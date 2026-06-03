@@ -5,23 +5,9 @@
 // ── CONFIG JSONBIN ─────────────────────────────
 const JSONBIN_KEY = '$2a$10$yNIbcGYE9no92zdz1pID5OVpWxUc3DyjkKHrIPrR1j9LKIUYxPd1a';
 const JSONBIN_URL = 'https://api.jsonbin.io/v3/b';
-let JSONBIN_BIN_ID = localStorage.getItem('enjoy_bin_id') || null;
+const JSONBIN_BIN_ID = '6a205af7f5f4af5e29b37d05';
 
 async function ensureBin() {
-  if (JSONBIN_BIN_ID) return JSONBIN_BIN_ID;
-  const res = await fetch(JSONBIN_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Master-Key': JSONBIN_KEY,
-      'X-Bin-Name': 'enjoy-rooftop-pedidos',
-      'X-Bin-Private': 'false'
-    },
-    body: JSON.stringify({ pedidos: [] })
-  });
-  const data = await res.json();
-  JSONBIN_BIN_ID = data.metadata.id;
-  localStorage.setItem('enjoy_bin_id', JSONBIN_BIN_ID);
   return JSONBIN_BIN_ID;
 }
 
