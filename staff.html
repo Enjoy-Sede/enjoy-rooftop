@@ -315,7 +315,7 @@
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
       render();
-      setInterval(render, 15000); // auto-refresh every 15s
+      setInterval(render, 10000); // auto-refresh every 15s
     } else {
       showToast('Senha incorreta.');
     }
@@ -328,8 +328,8 @@
     render();
   }
 
-  function render() {
-    const pedidos = getPedidos();
+  async function render() {
+    const pedidos = await fetchPedidosCloud();
     renderStats(pedidos);
     renderOrders(pedidos);
   }
@@ -414,16 +414,17 @@
     }).join('');
   }
 
-  function mudarStatus(id, status) {
-    updatePedidoStatus(id, status);
-    showToast('Pedido atualizado: ' + status);
-    render();
+  async function mudarStatus(id, status) {
+    showToast('Atualizando...');
+    await updatePedidoStatus(id, status);
+    showToast('Pedido: ' + status);
+    await render();
   }
 
-  function confirmarLimpar() {
+  async function confirmarLimpar() {
     if (confirm('Encerrar turno e apagar todos os pedidos? Esta ação não pode ser desfeita.')) {
-      clearPedidos();
-      render();
+      await clearPedidos();
+      await render();
       showToast('Dados do turno apagados.');
     }
   }
