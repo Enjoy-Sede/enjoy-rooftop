@@ -86,13 +86,6 @@ function savePedidos(p) { savePedidosLocal(p); }
 const MENU = {
   pratos: [
     {
-      id: 'risoto-funghi',
-      categoria: 'Prato Principal',
-      nome: 'Risoto de Funghi com Filé Mignon',
-      desc: 'Cremoso risoto ao perfume de trufas, finalizado com tiras de filé mignon grelhado na hora',
-      preco: 118.00
-    },
-    {
       id: 'carpaccio',
       categoria: 'Entrada',
       nome: 'Carpaccio',
@@ -112,6 +105,13 @@ const MENU = {
       nome: 'Tábua de Frios & Queijos',
       desc: 'Seleção de salaminhos artesanais, Grana Padano envelhecido e azeitonas temperadas',
       preco: null
+    },
+    {
+      id: 'risoto-funghi',
+      categoria: 'Prato Principal',
+      nome: 'Risoto de Funghi com Filé Mignon',
+      desc: 'Cremoso risoto ao perfume de trufas, finalizado com tiras de filé mignon grelhado na hora',
+      preco: 118.00
     }
   ],
   vinhos: [
@@ -125,7 +125,8 @@ const MENU = {
     { id: 'dona-julieta', categoria: 'Portugal — Tinto', nome: 'Dona Julieta Reserva', desc: 'Reserva português com caráter robusto e notas de frutos vermelhos', pais: 'Portugal', tipo: 'Tinto', preco_taca: null, preco_garrafa: 175.00 },
     { id: 'qpa-verde', categoria: 'Portugal — Branco', nome: 'QPA Verde', desc: 'Vinho Verde português leve, fresco e levemente efervescente', pais: 'Portugal', tipo: 'Branco', preco_taca: null, preco_garrafa: 119.00 },
     { id: 'agua-com-gas', categoria: 'Água', nome: 'Água com Gás', desc: 'Água mineral gaseificada gelada', pais: '', tipo: 'Água', preco_taca: 5.00, preco_garrafa: null },
-    { id: 'agua-sem-gas', categoria: 'Água', nome: 'Água sem Gás', desc: 'Água mineral natural gelada', pais: '', tipo: 'Água', preco_taca: 5.00, preco_garrafa: null }
+    { id: 'agua-sem-gas', categoria: 'Água', nome: 'Água sem Gás', desc: 'Água mineral natural gelada', pais: '', tipo: 'Água', preco_taca: 5.00, preco_garrafa: null },
+    { id: 'chopp-ipa', categoria: 'Chopp', nome: 'Chopp IPA', desc: 'Chopp artesanal India Pale Ale, 300ml gelado', pais: '', tipo: 'Chopp', preco_taca: 12.00, preco_garrafa: null }
   ]
 };
 
