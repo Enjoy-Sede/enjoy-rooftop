@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fechamento de Conta — Enjoy Rooftop</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .container { max-width: 640px; margin: 0 auto; padding: 0 20px 80px; }
+
+  /* LOGIN */
+  .login-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 20px; }
+  .login-card { background:rgba(255,255,255,0.03); border:1px solid var(--border); padding:40px 36px; width:100%; max-width:380px; border-radius:2px; text-align:center; }
+
+  /* SEARCH BAR */
+  .search-bar { display:flex; gap:10px; margin:24px 0; }
+  .search-bar .form-input { flex:1; }
+
+  /* PERSON LIST */
+  .person-list { display:flex; flex-direction:column; gap:10px; }
+
+  .person-row {
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; padding:16px 20px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--border);
+    border-radius:2px; cursor:pointer;
+    transition:border-color 0.2s;
+  }
+  .person-row:hover { border-color:rgba(177,140,84,0.4); }
+  .person-row.pago { opacity:0.45; border-color:rgba(80,180,80,0.2); }
+
+  .person-row-info {}
+  .person-row-name { font-family:'Playfair Display',serif; font-size:18px; color:var(--white); }
+  .person-row-meta { font-family:'Montserrat',sans-serif; font-size:8px; letter-spacing:1px; text-transform:uppercase; color:var(--blue-light); margin-top:2px; }
+  .person-row-right { text-align:right; flex-shrink:0; }
+  .person-row-total { font-family:'Montserrat',sans-serif; font-size:15px; font-weight:600; color:var(--gold-light); }
+  .person-row-status { font-family:'Montserrat',sans-serif; font-size:8px; letter-spacing:1px; text-transform:uppercase; margin-top:4px; }
+
+  /* MODAL */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:200; backdrop-filter:blur(4px); align-items:flex-end; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--navy-soft); border:1px solid var(--border); border-bottom:none; width:100%; max-width:640px; max-height:85vh; overflow-y:auto; border-radius:4px 4px 0 0; animation:slideUp 0.3s ease; }
+  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+
+  .modal-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--navy-soft); z-index:1; }
+  .modal-title { font-family:'Playfair Display',serif; font-size:20px; color:var(--white); }
+  .modal-close { background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; padding:4px 8px; }
+  .modal-close:hover { color:var(--white); }
+  .modal-body { padding:20px 24px; }
+  .modal-footer { padding:20px 24px; border-top:1px solid var(--border); display:flex; gap:12px; align-items:center; justify-content:space-between; position:sticky; bottom:0; background:var(--navy-soft); }
+
+  /* ITEMS TABLE */
+  .items-table { width:100%; border-collapse:collapse; margin-bottom:16px; }
+  .items-table th { font-family:'Montserrat',sans-serif; font-size:8px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--gold); padding:8px 12px; border-bottom:1px solid var(--border); text-align:left; }
+  .items-table td { font-family:'Cormorant Garamond',serif; font-size:16px; color:var(--cream-dim); padding:10px 12px; border-bottom:1px solid rgba(177,140,84,0.06); }
+  .items-table tr:last-child td { border-bottom:none; }
+  .items-table .num { font-family:'Montserrat',sans-serif; font-size:12px; color:var(--gold); text-align:right; }
+
+  .total-row { display:flex; justify-content:space-between; align-items:center; padding:16px 12px; background:rgba(177,140,84,0.06); border:1px solid var(--border); border-radius:2px; margin-top:8px; }
+  .total-label { font-family:'Montserrat',sans-serif; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); }
+  .total-value { font-family:'Playfair Display',serif; font-size:28px; color:var(--gold-light); }
+
+  /* PAYMENT METHOD */
+  .payment-methods { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:20px 0 8px; }
+  .pay-btn { padding:12px 8px; background:rgba(255,255,255,0.03); border:1px solid var(--border); color:var(--muted); font-family:'Montserrat',sans-serif; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; cursor:pointer; border-radius:2px; transition:all 0.2s; }
+  .pay-btn:hover { border-color:var(--gold-dim); color:var(--gold); background:rgba(177,140,84,0.08); }
+  .pay-btn.selected { border-color:var(--gold); color:var(--gold); background:rgba(177,140,84,0.12); }
+
+  .pay-label { font-family:'Montserrat',sans-serif; font-size:8px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--gold); display:block; margin-bottom:8px; margin-top:16px; }
+
+  /* STATS TOP */
+  .stats-top { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:20px 0; }
+  .stat-mini { background:rgba(255,255,255,0.03); border:1px solid var(--border); padding:14px; border-radius:2px; text-align:center; }
+  .stat-mini-val { font-family:'Playfair Display',serif; font-size:22px; color:var(--gold-light); }
+  .stat-mini-lbl { font-family:'Montserrat',sans-serif; font-size:8px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-top:2px; }
+
+  .empty { text-align:center; padding:48px; color:var(--muted); font-family:'Cormorant Garamond',serif; font-style:italic; font-size:17px; }
+
+  /* FILTER TABS */
+  .filter-tabs { display:flex; gap:8px; margin-bottom:20px; }
+  .ftab { font-family:'Montserrat',sans-serif; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; padding:7px 14px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; border-radius:2px; transition:all 0.2s; }
+  .ftab.active { color:var(--gold); border-color:var(--gold-dim); background:rgba(177,140,84,0.08); }
+
+  .obs-nota { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:13px; color:var(--muted); padding:8px 12px; background:rgba(47,94,143,0.08); border-left:2px solid var(--blue-dim); margin-top:8px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card fade-up">
+    <div class="brand-label">Fechamento de Conta</div>
+    <div class="brand-name" style="font-family:'Playfair Display',serif;font-size:22px;color:var(--white);margin-bottom:4px;">Enjoy Rooftop</div>
+    <div class="brand-sub" style="font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:28px;">Acesso Restrito</div>
+    <div class="form-group" style="text-align:left;">
+      <label class="form-label">Senha</label>
+      <input type="password" id="senhaInput" class="form-input" placeholder="••••••" onkeydown="if(event.key==='Enter')login()">
+    </div>
+    <button class="btn btn-gold" style="width:100%;" onclick="login()">Entrar</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main" style="display:none;">
+  <div class="page-header">
+    <div class="brand-label">Fechamento de Conta</div>
+    <div class="brand-name">Enjoy Rooftop Bistrô</div>
+  </div>
+
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Cardápio</a>
+    <a href="staff.html" class="nav-link">Staff</a>
+    <a href="fechamento.html" class="nav-link active">Fechamento</a>
+    <a href="relatorio.html" class="nav-link">Relatório</a>
+  </div>
+
+  <div class="container">
+
+    <!-- Stats -->
+    <div class="stats-top" id="statsTop"></div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" class="form-input" placeholder="Buscar por nome..." oninput="renderList()">
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-tabs">
+      <button class="ftab active" onclick="setTab('todos',this)">Todos</button>
+      <button class="ftab" onclick="setTab('aberto',this)">Em Aberto</button>
+      <button class="ftab" onclick="setTab('pago',this)">Pagos</button>
+    </div>
+
+    <!-- List -->
+    <div class="person-list" id="personList"></div>
+
+  </div>
+</div>
+
+<!-- MODAL CONTA -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeIfOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalNome">—</div>
+        <div style="font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--blue-light);margin-top:3px;" id="modalAmbiente">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="modalItems"></div>
+
+      <div class="total-row">
+        <div>
+          <div class="total-label">Total da Conta</div>
+          <div class="total-value" id="modalTotal">R$ 0,00</div>
+        </div>
+        <span class="badge" id="modalStatusBadge"></span>
+      </div>
+
+      <div id="paymentSection">
+        <span class="pay-label">Forma de Pagamento</span>
+        <div class="payment-methods">
+          <button class="pay-btn" onclick="selectPay(this,'Dinheiro')">💵 Dinheiro</button>
+          <button class="pay-btn" onclick="selectPay(this,'Crédito')">💳 Crédito</button>
+          <button class="pay-btn" onclick="selectPay(this,'Débito')">💳 Débito</button>
+          <button class="pay-btn" onclick="selectPay(this,'Pix')">📱 Pix</button>
+          <button class="pay-btn" onclick="selectPay(this,'Vale')">🎟 Vale</button>
+          <button class="pay-btn" onclick="selectPay(this,'Outro')">• Outro</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div id="modalFooterInfo" style="font-family:'Montserrat',sans-serif;font-size:10px;color:var(--muted);"></div>
+      <button class="btn btn-gold" id="btnFechar" onclick="fecharConta()">Fechar Conta</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+<script>
+  const STAFF_PASS = 'enjoy2026';
+  let currentTab = 'todos';
+  let selectedPay = '';
+  let currentPessoa = null;
+
+  function login() {
+    if (document.getElementById('senhaInput').value === STAFF_PASS) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('main').style.display = 'block';
+      render();
+      setInterval(render, 15000);
+    } else {
+      showToast('Senha incorreta.');
+    }
+  }
+
+  function setTab(tab, btn) {
+    currentTab = tab;
+    document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderList();
+  }
+
+  async function render() {
+    const pedidos = await fetchPedidosCloud();
+    renderStats(pedidos);
+    renderList(pedidos);
+  }
+
+  function renderStats(pedidos) {
+    if (!pedidos) return;
+    const pessoas = groupByPerson(pedidos);
+    const total = Object.values(pessoas).length;
+    const pagos = Object.values(pessoas).filter(p => p.pago).length;
+    const abertos = total - pagos;
+    const faturado = Object.values(pessoas).filter(p => p.pago).reduce((s,p)=>s+p.total,0);
+
+    document.getElementById('statsTop').innerHTML = `
+      <div class="stat-mini">
+        <div class="stat-mini-val" style="color:#e07070;">${abertos}</div>
+        <div class="stat-mini-lbl">Em Aberto</div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-val" style="color:#6dcc6d;">${pagos}</div>
+        <div class="stat-mini-lbl">Pagos</div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-val">${formatMoney(faturado)}</div>
+        <div class="stat-mini-lbl">Recebido</div>
+      </div>`;
+  }
+
+  function groupByPerson(pedidos) {
+    const map = {};
+    pedidos.filter(p => p.status !== 'cancelado').forEach(p => {
+      if (!map[p.nome]) map[p.nome] = { nome: p.nome, ambiente: p.ambiente, pedidos: [], total: 0, pago: false, formaPagamento: null };
+      map[p.nome].pedidos.push(p);
+      map[p.nome].total += p.total || 0;
+      if (p.pago) { map[p.nome].pago = true; map[p.nome].formaPagamento = p.formaPagamento; }
+    });
+    return map;
+  }
+
+  async function renderList(pedidos) {
+    if (!pedidos) pedidos = await fetchPedidosCloud();
+    const pessoas = groupByPerson(pedidos);
+    const search = document.getElementById('searchInput').value.toLowerCase();
+
+    let list = Object.values(pessoas).filter(p => {
+      if (search && !p.nome.toLowerCase().includes(search)) return false;
+      if (currentTab === 'aberto') return !p.pago;
+      if (currentTab === 'pago') return p.pago;
+      return true;
+    }).sort((a,b) => a.pago - b.pago || b.total - a.total);
+
+    if (list.length === 0) {
+      document.getElementById('personList').innerHTML = '<div class="empty">Nenhuma conta encontrada.</div>';
+      return;
+    }
+
+    document.getElementById('personList').innerHTML = list.map(p => `
+      <div class="person-row ${p.pago ? 'pago' : ''}" onclick="openModal('${p.nome}')">
+        <div class="person-row-info">
+          <div class="person-row-name">${p.nome}</div>
+          <div class="person-row-meta">${p.ambiente} · ${p.pedidos.length} pedido(s)</div>
+        </div>
+        <div class="person-row-right">
+          <div class="person-row-total">${formatMoney(p.total)}</div>
+          <div class="person-row-status" style="color:${p.pago ? '#6dcc6d' : '#e07070'}">
+            ${p.pago ? '✓ Pago · ' + (p.formaPagamento||'') : '● Em aberto'}
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  async function openModal(nome) {
+    const pedidos = await fetchPedidosCloud();
+    const pessoas = groupByPerson(pedidos);
+    const person = pessoas[nome];
+    if (!person) return;
+
+    currentPessoa = person;
+    selectedPay = person.formaPagamento || '';
+
+    document.getElementById('modalNome').textContent = person.nome;
+    document.getElementById('modalAmbiente').textContent = person.ambiente;
+    document.getElementById('modalTotal').textContent = formatMoney(person.total);
+
+    // Badge
+    const badge = document.getElementById('modalStatusBadge');
+    badge.className = 'badge ' + (person.pago ? 'badge-green' : 'badge-red');
+    badge.textContent = person.pago ? 'Pago' : 'Em aberto';
+
+    // Items consolidados
+    const itemMap = {};
+    person.pedidos.forEach(p => {
+      p.itens.forEach(i => {
+        const k = i.id + (i.subtipo||'');
+        if (!itemMap[k]) itemMap[k] = { ...i, qty: 0, subtotal: 0 };
+        itemMap[k].qty += i.qty;
+        itemMap[k].subtotal += i.subtotal || 0;
+      });
+    });
+
+    // Observações
+    const obs = person.pedidos.filter(p => p.observacoes).map(p => p.observacoes).join(' | ');
+
+    let html = `<table class="items-table">
+      <thead><tr><th>Item</th><th>Qtd</th><th style="text-align:right">Subtotal</th></tr></thead>
+      <tbody>`;
+    Object.values(itemMap).forEach(i => {
+      html += `<tr>
+        <td>${i.nome}${i.subtipo ? ` <small style="color:var(--muted)">(${i.subtipo})</small>` : ''}</td>
+        <td class="num" style="text-align:left;">× ${i.qty}</td>
+        <td class="num">${i.subtotal ? formatMoney(i.subtotal) : 'A def.'}</td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    if (obs) html += `<div class="obs-nota">📝 ${obs}</div>`;
+
+    document.getElementById('modalItems').innerHTML = html;
+
+    // Payment section
+    const paySection = document.getElementById('paymentSection');
+    const btnFechar = document.getElementById('btnFechar');
+    const footerInfo = document.getElementById('modalFooterInfo');
+
+    if (person.pago) {
+      paySection.style.display = 'none';
+      btnFechar.textContent = 'Reabrir Conta';
+      btnFechar.className = 'btn btn-ghost';
+      footerInfo.textContent = `Pago via ${person.formaPagamento || '—'}`;
+    } else {
+      paySection.style.display = 'block';
+      btnFechar.textContent = 'Confirmar Pagamento';
+      btnFechar.className = 'btn btn-gold';
+      footerInfo.textContent = 'Selecione a forma de pagamento';
+      // Reset pay buttons
+      document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected'));
+      if (selectedPay) {
+        document.querySelectorAll('.pay-btn').forEach(b => {
+          if (b.textContent.includes(selectedPay)) b.classList.add('selected');
+        });
+      }
+    }
+
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+
+  function selectPay(btn, method) {
+    document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedPay = method;
+    document.getElementById('modalFooterInfo').textContent = `Pagamento: ${method}`;
+  }
+
+  async function fecharConta() {
+    if (!currentPessoa) return;
+
+    if (currentPessoa.pago) {
+      // Reabrir
+      const pedidos = await fetchPedidosCloud();
+      pedidos.forEach(p => { if (p.nome === currentPessoa.nome) { p.pago = false; p.formaPagamento = null; } });
+      await savePedidosCloud(pedidos);
+      showToast('Conta reaberta.');
+      closeModal();
+      render();
+      return;
+    }
+
+    if (!selectedPay) { showToast('Selecione a forma de pagamento.'); return; }
+
+    const pedidos = await fetchPedidosCloud();
+    pedidos.forEach(p => {
+      if (p.nome === currentPessoa.nome && p.status !== 'cancelado') {
+        p.pago = true;
+        p.formaPagamento = selectedPay;
+        p.pagamentoTs = new Date().toISOString();
+      }
+    });
+    await savePedidosCloud(pedidos);
+    showToast(`Conta de ${currentPessoa.nome} fechada! ✓`);
+    closeModal();
+    render();
+  }
+
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+  function closeIfOutside(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+</script>
+</body>
+</html>
