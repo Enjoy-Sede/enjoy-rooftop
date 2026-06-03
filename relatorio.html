@@ -261,8 +261,9 @@
     document.getElementById('tabAmbientes').style.display = tab === 'ambientes' ? '' : 'none';
   }
 
-  function render() {
-    const pedidos = getPedidos().filter(p => p.status !== 'cancelado');
+  async function render() {
+    const todos = await fetchPedidosCloud();
+    const pedidos = todos.filter(p => p.status !== 'cancelado');
     renderSummary(pedidos);
     renderPessoas(pedidos);
     renderItens(pedidos);
@@ -425,8 +426,9 @@
       </div>`;
   }
 
-  function exportarTexto() {
-    const pedidos = getPedidos().filter(p => p.status !== 'cancelado');
+  async function exportarTexto() {
+    const todos = await fetchPedidosCloud();
+    const pedidos = todos.filter(p => p.status !== 'cancelado');
     if (pedidos.length === 0) { showToast('Nenhum pedido para exportar.'); return; }
 
     let txt = 'ENJOY ROOFTOP BISTRÔ — RELATÓRIO\n';
