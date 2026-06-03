@@ -103,8 +103,8 @@ const MENU = {
       id: 'tabua-frios',
       categoria: 'Para Compartilhar',
       nome: 'Tábua de Frios & Queijos',
-      desc: 'Seleção de salaminhos artesanais, Grana Padano envelhecido e azeitonas temperadas',
-      preco: null
+      desc: 'Seleção de queijos, azeitonas e salaminho',
+      preco: 69.90
     },
     {
       id: 'risoto-funghi',
