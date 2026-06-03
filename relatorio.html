@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório — Enjoy Rooftop Bistrô</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .container { max-width: 860px; margin: 0 auto; padding: 0 20px 80px; }
+
+  /* ── LOGIN ── */
+  .login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  .login-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 380px;
+    border-radius: 2px;
+    text-align: center;
+  }
+
+  .report-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+    gap: 0;
+    overflow-x: auto;
+  }
+  .report-tab {
+    padding: 14px 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .report-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* ── SUMMARY CARDS ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .summary-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    padding: 18px 16px;
+    border-radius: 2px;
+  }
+  .summary-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: var(--gold-light);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .summary-lbl {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── REPORT TABLE ── */
+  .report-table { width: 100%; border-collapse: collapse; }
+  .report-table th {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+  }
+  .report-table td {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    color: var(--cream-dim);
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(177,140,84,0.06);
+  }
+  .report-table tr:last-child td { border-bottom: none; }
+  .report-table tr:hover td { background: rgba(177,140,84,0.04); }
+  .report-table .num {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    color: var(--gold-light);
+  }
+  .report-table .name-cell { color: var(--white); }
+
+  .table-wrap {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .table-title {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* ── PERSON DETAIL ── */
+  .person-block {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    animation: fadeUp 0.3s ease both;
+  }
+  .person-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(47,94,143,0.06);
+    cursor: pointer;
+  }
+  .person-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--white);
+  }
+  .person-meta {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 8px;
+    letter-spacing: 1px;
+    color: var(--blue-light);
+    margin-top: 2px;
+  }
+  .person-total {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gold-light);
+  }
+  .person-body { padding: 12px 20px; }
+
+  /* ── EXPORT ── */
+  .export-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .empty {
+    text-align: center;
+    padding: 60px;
+    color: var(--muted);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 18px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card fade-up">
+    <div class="brand-label">Acesso Restrito</div>
+    <div class="brand-name" style="font-family:'Playfair Display',serif;font-size:22px;color:var(--white);margin-bottom:4px;">Relatórios</div>
+    <div class="brand-sub" style="font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:28px;">Enjoy Rooftop Bistrô</div>
+    <div class="form-group" style="text-align:left;">
+      <label class="form-label">Senha</label>
+      <input type="password" id="senhaInput" class="form-input" placeholder="••••••" onkeydown="if(event.key==='Enter')login()">
+    </div>
+    <button class="btn btn-gold" style="width:100%;" onclick="login()">Entrar</button>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div id="main" style="display:none;">
+  <div class="page-header">
+    <div class="brand-label">Relatórios</div>
+    <div class="brand-name">Enjoy Rooftop Bistrô</div>
+    <div class="brand-sub">Análise de Consumo</div>
+  </div>
+
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Cardápio</a>
+    <a href="staff.html" class="nav-link">Staff</a>
+    <a href="relatorio.html" class="nav-link active">Relatório</a>
+  </div>
+
+  <div class="container">
+    <!-- Summary -->
+    <div class="summary-grid" id="summaryGrid"></div>
+
+    <!-- Export -->
+    <div class="export-bar">
+      <button class="btn btn-outline" onclick="exportarTexto()">↓ Exportar como Texto</button>
+      <button class="btn btn-ghost" onclick="render()">↻ Atualizar</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="report-tabs">
+      <button class="report-tab active" onclick="showReportTab('pessoas', this)">Por Pessoa</button>
+      <button class="report-tab" onclick="showReportTab('itens', this)">Por Item</button>
+      <button class="report-tab" onclick="showReportTab('ambientes', this)">Por Ambiente</button>
+    </div>
+
+    <div id="tabPessoas"></div>
+    <div id="tabItens" style="display:none;"></div>
+    <div id="tabAmbientes" style="display:none;"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+<script>
+  const STAFF_PASS = 'enjoy2026';
+
+  function login() {
+    if (document.getElementById('senhaInput').value === STAFF_PASS) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('main').style.display = 'block';
+      render();
+    } else {
+      showToast('Senha incorreta.');
+    }
+  }
+
+  function showReportTab(tab, btn) {
+    document.querySelectorAll('.report-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tabPessoas').style.display = tab === 'pessoas' ? '' : 'none';
+    document.getElementById('tabItens').style.display = tab === 'itens' ? '' : 'none';
+    document.getElementById('tabAmbientes').style.display = tab === 'ambientes' ? '' : 'none';
+  }
+
+  function render() {
+    const pedidos = getPedidos().filter(p => p.status !== 'cancelado');
+    renderSummary(pedidos);
+    renderPessoas(pedidos);
+    renderItens(pedidos);
+    renderAmbientes(pedidos);
+  }
+
+  function renderSummary(pedidos) {
+    const total = pedidos.reduce((s, p) => s + (p.total || 0), 0);
+    const pessoas = new Set(pedidos.map(p => p.nome)).size;
+    const itensTotal = pedidos.reduce((s, p) => s + p.itens.reduce((ss, i) => ss + i.qty, 0), 0);
+    const ambientes = new Set(pedidos.map(p => p.ambiente)).size;
+
+    document.getElementById('summaryGrid').innerHTML = `
+      <div class="summary-card">
+        <div class="summary-val">${formatMoney(total)}</div>
+        <div class="summary-lbl">Faturamento Total</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-val">${pedidos.length}</div>
+        <div class="summary-lbl">Total de Pedidos</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-val">${pessoas}</div>
+        <div class="summary-lbl">Pessoas Atendidas</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-val">${itensTotal}</div>
+        <div class="summary-lbl">Itens Vendidos</div>
+      </div>
+    `;
+  }
+
+  function renderPessoas(pedidos) {
+    if (pedidos.length === 0) {
+      document.getElementById('tabPessoas').innerHTML = '<div class="empty">Nenhum pedido registrado ainda.</div>';
+      return;
+    }
+
+    // Group by nome
+    const map = {};
+    pedidos.forEach(p => {
+      if (!map[p.nome]) map[p.nome] = { nome: p.nome, ambiente: p.ambiente, pedidos: [], total: 0 };
+      map[p.nome].pedidos.push(p);
+      map[p.nome].total += p.total || 0;
+    });
+
+    // Consolidate items per person
+    const html = Object.values(map).sort((a,b) => b.total - a.total).map(person => {
+      const itemMap = {};
+      person.pedidos.forEach(p => {
+        p.itens.forEach(i => {
+          const key = i.id + (i.subtipo || '');
+          if (!itemMap[key]) itemMap[key] = { ...i, qty: 0, subtotal: 0 };
+          itemMap[key].qty += i.qty;
+          itemMap[key].subtotal += i.subtotal || 0;
+        });
+      });
+
+      const rows = Object.values(itemMap).map(i =>
+        `<div class="order-item-row" style="font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--cream-dim);display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(177,140,84,0.05);">
+          <span>${i.nome}${i.subtipo ? ` <small style="color:var(--muted)">(${i.subtipo})</small>` : ''}</span>
+          <span style="font-family:'Montserrat',sans-serif;font-size:11px;color:var(--gold);white-space:nowrap;">
+            × ${i.qty} &nbsp;·&nbsp; ${i.subtotal ? formatMoney(i.subtotal) : 'A definir'}
+          </span>
+        </div>`
+      ).join('');
+
+      return `
+      <div class="person-block">
+        <div class="person-header">
+          <div>
+            <div class="person-name">${person.nome}</div>
+            <div class="person-meta">${person.ambiente} · ${person.pedidos.length} pedido(s)</div>
+          </div>
+          <div class="person-total">${formatMoney(person.total)}</div>
+        </div>
+        <div class="person-body">${rows}</div>
+      </div>`;
+    }).join('');
+
+    document.getElementById('tabPessoas').innerHTML = html;
+  }
+
+  function renderItens(pedidos) {
+    const itemMap = {};
+    pedidos.forEach(p => {
+      p.itens.forEach(i => {
+        const key = i.id + (i.subtipo || '');
+        if (!itemMap[key]) itemMap[key] = { nome: i.nome, categoria: i.categoria, subtipo: i.subtipo, qty: 0, total: 0 };
+        itemMap[key].qty += i.qty;
+        itemMap[key].total += i.subtotal || 0;
+      });
+    });
+
+    const sorted = Object.values(itemMap).sort((a, b) => b.qty - a.qty);
+
+    if (sorted.length === 0) {
+      document.getElementById('tabItens').innerHTML = '<div class="empty">Nenhum item vendido ainda.</div>';
+      return;
+    }
+
+    const rows = sorted.map((item, i) =>
+      `<tr>
+        <td class="num">${i + 1}</td>
+        <td class="name-cell">${item.nome}${item.subtipo ? ` <small style="color:var(--muted)">(${item.subtipo})</small>` : ''}</td>
+        <td><span class="badge badge-gold">${item.categoria}</span></td>
+        <td class="num">${item.qty}</td>
+        <td class="num">${formatMoney(item.total)}</td>
+      </tr>`
+    ).join('');
+
+    document.getElementById('tabItens').innerHTML = `
+      <div class="table-wrap">
+        <div class="table-title">Ranking de Itens <span style="color:var(--muted);font-size:8px;">${sorted.length} itens</span></div>
+        <table class="report-table">
+          <thead><tr>
+            <th>#</th><th>Item</th><th>Categoria</th><th>Qtd</th><th>Total</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  function renderAmbientes(pedidos) {
+    const map = {};
+    pedidos.forEach(p => {
+      if (!map[p.ambiente]) map[p.ambiente] = { pessoas: new Set(), pedidos: 0, total: 0, itens: 0 };
+      map[p.ambiente].pessoas.add(p.nome);
+      map[p.ambiente].pedidos++;
+      map[p.ambiente].total += p.total || 0;
+      map[p.ambiente].itens += p.itens.reduce((s, i) => s + i.qty, 0);
+    });
+
+    if (Object.keys(map).length === 0) {
+      document.getElementById('tabAmbientes').innerHTML = '<div class="empty">Nenhum dado disponível.</div>';
+      return;
+    }
+
+    const sorted = Object.entries(map).sort((a, b) => b[1].total - a[1].total);
+
+    const rows = sorted.map(([amb, data]) =>
+      `<tr>
+        <td class="name-cell">${amb}</td>
+        <td class="num">${data.pessoas.size}</td>
+        <td class="num">${data.pedidos}</td>
+        <td class="num">${data.itens}</td>
+        <td class="num">${formatMoney(data.total)}</td>
+      </tr>`
+    ).join('');
+
+    document.getElementById('tabAmbientes').innerHTML = `
+      <div class="table-wrap">
+        <div class="table-title">Consumo por Ambiente</div>
+        <table class="report-table">
+          <thead><tr>
+            <th>Ambiente</th><th>Pessoas</th><th>Pedidos</th><th>Itens</th><th>Total</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  function exportarTexto() {
+    const pedidos = getPedidos().filter(p => p.status !== 'cancelado');
+    if (pedidos.length === 0) { showToast('Nenhum pedido para exportar.'); return; }
+
+    let txt = 'ENJOY ROOFTOP BISTRÔ — RELATÓRIO\n';
+    txt += '='.repeat(40) + '\n';
+    txt += `Data: ${new Date().toLocaleString('pt-BR')}\n\n`;
+
+    // by person
+    const map = {};
+    pedidos.forEach(p => {
+      if (!map[p.nome]) map[p.nome] = { ambiente: p.ambiente, itens: {}, total: 0 };
+      map[p.nome].total += p.total || 0;
+      p.itens.forEach(i => {
+        const k = i.nome + (i.subtipo ? ` (${i.subtipo})` : '');
+        if (!map[p.nome].itens[k]) map[p.nome].itens[k] = { qty: 0, subtotal: 0 };
+        map[p.nome].itens[k].qty += i.qty;
+        map[p.nome].itens[k].subtotal += i.subtotal || 0;
+      });
+    });
+
+    txt += 'POR PESSOA\n' + '-'.repeat(40) + '\n';
+    Object.entries(map).forEach(([nome, data]) => {
+      txt += `\n${nome} — ${data.ambiente}\n`;
+      Object.entries(data.itens).forEach(([item, d]) => {
+        txt += `  ${item}: x${d.qty} — ${formatMoney(d.subtotal)}\n`;
+      });
+      txt += `  TOTAL: ${formatMoney(data.total)}\n`;
+    });
+
+    const total = pedidos.reduce((s, p) => s + (p.total || 0), 0);
+    txt += '\n' + '='.repeat(40) + '\n';
+    txt += `TOTAL GERAL: ${formatMoney(total)}\n`;
+
+    const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `enjoy-relatorio-${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.txt`;
+    a.click();
+    showToast('Relatório exportado!');
+  }
+</script>
+</body>
+</html>

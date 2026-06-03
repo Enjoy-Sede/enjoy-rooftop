@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff — Enjoy Rooftop Bistrô</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .container { max-width: 860px; margin: 0 auto; padding: 0 20px 60px; }
+
+  /* ── LOGIN ── */
+  .login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  .login-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 380px;
+    border-radius: 2px;
+    text-align: center;
+  }
+  .login-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .login-sub {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+
+  /* ── DASHBOARD ── */
+  .dashboard { display: none; }
+
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding: 20px 0;
+  }
+  .stat-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    padding: 16px;
+    border-radius: 2px;
+    text-align: center;
+  }
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--gold-light);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-btn {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    background: rgba(177,140,84,0.1);
+    color: var(--gold);
+    border-color: var(--gold-dim);
+  }
+  .filter-btn.pendente.active { color: #e07070; border-color: rgba(180,60,60,0.4); background: rgba(180,60,60,0.08); }
+  .filter-btn.confirmado.active { color: var(--blue-light); border-color: var(--border-blue); background: rgba(47,94,143,0.1); }
+  .filter-btn.entregue.active { color: #6dcc6d; border-color: rgba(80,180,80,0.3); background: rgba(80,180,80,0.08); }
+
+  .refresh-btn {
+    margin-left: auto;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    border: 1px solid var(--border-blue);
+    background: rgba(47,94,143,0.1);
+    color: var(--blue-light);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .refresh-btn:hover { background: rgba(47,94,143,0.2); }
+
+  /* ── ORDER CARD ── */
+  .orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .order-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    animation: fadeUp 0.3s ease both;
+    transition: border-color 0.2s;
+  }
+  .order-card.pendente { border-left: 3px solid #c0392b; }
+  .order-card.confirmado { border-left: 3px solid var(--blue); }
+  .order-card.entregue { border-left: 3px solid #50b450; opacity: 0.7; }
+
+  .order-card-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .order-nome {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    color: var(--white);
+    line-height: 1.1;
+  }
+  .order-ambiente {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--blue-light);
+    margin-top: 3px;
+  }
+  .order-time {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .order-card-body { padding: 12px 16px; }
+
+  .order-item-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(177,140,84,0.05);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    color: var(--cream-dim);
+  }
+  .order-item-row:last-child { border-bottom: none; }
+  .order-item-qty {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  .order-obs {
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: rgba(47,94,143,0.1);
+    border-left: 2px solid var(--blue-dim);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--muted);
+    border-radius: 0 2px 2px 0;
+  }
+
+  .order-card-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .order-total {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold-light);
+  }
+  .order-actions { display: flex; gap: 6px; }
+  .action-btn {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-confirmar { background: var(--blue); color: var(--white); }
+  .action-confirmar:hover { background: var(--blue-light); }
+  .action-entregar { background: #3d7a3d; color: var(--white); }
+  .action-entregar:hover { background: #50a050; }
+  .action-cancelar { background: rgba(180,60,60,0.2); color: #e07070; border: 1px solid rgba(180,60,60,0.3); }
+  .action-cancelar:hover { background: rgba(180,60,60,0.3); }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 18px;
+    grid-column: 1/-1;
+  }
+
+  /* ── CLEAR BTN ── */
+  .danger-zone {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card fade-up">
+    <div class="brand-label">Acesso Restrito</div>
+    <div class="login-title">Painel Staff</div>
+    <div class="login-sub">Enjoy Rooftop Bistrô</div>
+    <div class="form-group" style="text-align:left;">
+      <label class="form-label">Senha</label>
+      <input type="password" id="senhaInput" class="form-input" placeholder="••••••" onkeydown="if(event.key==='Enter')login()">
+    </div>
+    <button class="btn btn-gold" style="width:100%;" onclick="login()">Entrar</button>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div id="dashboard" class="dashboard">
+  <div class="page-header">
+    <div class="brand-label">Painel de Controle</div>
+    <div class="brand-name">Staff — Enjoy Rooftop</div>
+    <div class="brand-sub">Pedidos em Tempo Real</div>
+  </div>
+
+  <div class="nav-links">
+    <a href="index.html" class="nav-link">Cardápio</a>
+    <a href="staff.html" class="nav-link active">Staff</a>
+    <a href="relatorio.html" class="nav-link">Relatório</a>
+  </div>
+
+  <div class="container">
+    <div class="stats-bar" id="statsBar"></div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setFilter('todos', this)">Todos</button>
+      <button class="filter-btn pendente" onclick="setFilter('pendente', this)">Pendentes</button>
+      <button class="filter-btn confirmado" onclick="setFilter('confirmado', this)">Confirmados</button>
+      <button class="filter-btn entregue" onclick="setFilter('entregue', this)">Entregues</button>
+      <button class="refresh-btn" onclick="render()">↻ Atualizar</button>
+    </div>
+
+    <div class="orders-grid" id="ordersGrid"></div>
+
+    <div class="danger-zone">
+      <button class="btn btn-ghost" onclick="confirmarLimpar()" style="font-size:8px;padding:8px 16px;">
+        Encerrar turno e limpar dados
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+<script>
+  const STAFF_PASS = 'enjoy2026';
+  let currentFilter = 'todos';
+
+  function login() {
+    if (document.getElementById('senhaInput').value === STAFF_PASS) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      render();
+      setInterval(render, 15000); // auto-refresh every 15s
+    } else {
+      showToast('Senha incorreta.');
+    }
+  }
+
+  function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function render() {
+    const pedidos = getPedidos();
+    renderStats(pedidos);
+    renderOrders(pedidos);
+  }
+
+  function renderStats(pedidos) {
+    const pendentes = pedidos.filter(p => p.status === 'pendente').length;
+    const confirmados = pedidos.filter(p => p.status === 'confirmado').length;
+    const entregues = pedidos.filter(p => p.status === 'entregue').length;
+    const total = pedidos.reduce((s, p) => s + (p.total || 0), 0);
+
+    document.getElementById('statsBar').innerHTML = `
+      <div class="stat-card">
+        <div class="stat-value" style="color:#e07070;">${pendentes}</div>
+        <div class="stat-label">Pendentes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--blue-light);">${confirmados}</div>
+        <div class="stat-label">Confirmados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:#6dcc6d;">${entregues}</div>
+        <div class="stat-label">Entregues</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${formatMoney(total)}</div>
+        <div class="stat-label">Total Geral</div>
+      </div>
+    `;
+  }
+
+  function renderOrders(pedidos) {
+    let filtered = currentFilter === 'todos' ? pedidos : pedidos.filter(p => p.status === currentFilter);
+    // show newest first
+    filtered = [...filtered].reverse();
+
+    if (filtered.length === 0) {
+      document.getElementById('ordersGrid').innerHTML = `<div class="empty-state">Nenhum pedido encontrado.</div>`;
+      return;
+    }
+
+    document.getElementById('ordersGrid').innerHTML = filtered.map(p => {
+      const itens = p.itens.map(i =>
+        `<div class="order-item-row">
+          <span>${i.nome}${i.subtipo ? ` <small style="color:var(--muted);font-size:11px;">(${i.subtipo})</small>` : ''}</span>
+          <span class="order-item-qty">× ${i.qty} ${i.subtotal ? '· ' + formatMoney(i.subtotal) : ''}</span>
+        </div>`
+      ).join('');
+
+      const obs = p.observacoes ? `<div class="order-obs">📝 ${p.observacoes}</div>` : '';
+
+      let actions = '';
+      if (p.status === 'pendente') {
+        actions = `
+          <button class="action-btn action-confirmar" onclick="mudarStatus(${p.id}, 'confirmado')">Confirmar</button>
+          <button class="action-btn action-cancelar" onclick="mudarStatus(${p.id}, 'cancelado')">Cancelar</button>`;
+      } else if (p.status === 'confirmado') {
+        actions = `<button class="action-btn action-entregar" onclick="mudarStatus(${p.id}, 'entregue')">Entregue ✓</button>`;
+      } else if (p.status === 'entregue') {
+        actions = `<span class="badge badge-green">Entregue</span>`;
+      } else if (p.status === 'cancelado') {
+        actions = `<span class="badge badge-red">Cancelado</span>`;
+      }
+
+      return `
+      <div class="order-card ${p.status}">
+        <div class="order-card-header">
+          <div>
+            <div class="order-nome">${p.nome}</div>
+            <div class="order-ambiente">${p.ambiente}</div>
+          </div>
+          <div class="order-time">${formatTime(p.timestamp)}</div>
+        </div>
+        <div class="order-card-body">
+          ${itens}
+          ${obs}
+        </div>
+        <div class="order-card-footer">
+          <div class="order-total">${p.total ? formatMoney(p.total) : 'A definir'}</div>
+          <div class="order-actions">${actions}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function mudarStatus(id, status) {
+    updatePedidoStatus(id, status);
+    showToast('Pedido atualizado: ' + status);
+    render();
+  }
+
+  function confirmarLimpar() {
+    if (confirm('Encerrar turno e apagar todos os pedidos? Esta ação não pode ser desfeita.')) {
+      clearPedidos();
+      render();
+      showToast('Dados do turno apagados.');
+    }
+  }
+</script>
+</body>
+</html>
