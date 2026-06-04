@@ -422,11 +422,17 @@
   }
 
   async function confirmarLimpar() {
-    if (confirm('Encerrar turno e apagar todos os pedidos? Esta ação não pode ser desfeita.')) {
-      await clearPedidos();
-      await render();
-      showToast('Dados do turno apagados.');
+    const senha = prompt('⚠️ ATENÇÃO: Esta ação apaga todos os pedidos!\n\nDigite a senha de administrador para continuar:');
+    if (senha === null) return;
+    if (senha !== 'enjoy@admin2026') {
+      alert('Senha incorreta. Operação cancelada.');
+      return;
     }
+    const confirma = confirm('Tem certeza? Esta ação NÃO pode ser desfeita. Todos os pedidos serão apagados.');
+    if (!confirma) return;
+    await clearPedidos();
+    await render();
+    showToast('Dados do turno apagados.');
   }
 </script>
 </body>
