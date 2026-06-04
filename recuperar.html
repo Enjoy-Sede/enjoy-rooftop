@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recuperar Dados — Enjoy</title>
+<style>
+  body { background:#00131F; color:#F5EDD8; font-family:sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; padding:20px; box-sizing:border-box; }
+  .card { background:#001a2e; border:1px solid #B18C54; padding:32px 24px; border-radius:4px; max-width:500px; width:100%; text-align:center; }
+  h2 { color:#B18C54; margin-bottom:8px; font-size:22px; }
+  p { color:#8A9AAA; font-size:13px; margin-bottom:24px; line-height:1.6; }
+  button { background:#B18C54; color:#00131F; border:none; padding:14px 32px; font-weight:bold; font-size:13px; letter-spacing:2px; text-transform:uppercase; cursor:pointer; border-radius:2px; width:100%; margin-bottom:10px; }
+  button:hover { background:#D4AA6A; }
+  button.sec { background:transparent; color:#B18C54; border:1px solid #7A6038; }
+  #resultado { margin-top:20px; text-align:left; font-size:12px; background:#000d18; padding:16px; border-radius:2px; display:none; word-break:break-all; color:#6dcc6d; max-height:200px; overflow-y:auto; }
+  #status { margin-top:16px; font-size:14px; }
+  .ok { color:#6dcc6d; } .err { color:#e07070; } .info { color:#B18C54; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>🔄 Recuperar Pedidos</h2>
+  <p>Esta página vai ler os dados salvos localmente neste dispositivo e restaurar na nuvem.</p>
+  <button onclick="recuperar()">Recuperar Agora</button>
+  <button class="sec" onclick="mostrarDados()">Ver Dados Locais</button>
+  <div id="status"></div>
+  <div id="resultado"></div>
+</div>
+
+<script>
+const KEY    = '$2a$10$yNIbcGYE9no92zdz1pID5OVpWxUc3DyjkKHrIPrR1j9LKIUYxPd1a';
+const BIN_ID = '6a205af7f5f4af5e29b37d05';
+
+function log(msg, cls='info') {
+  const el = document.getElementById('status');
+  el.innerHTML += `<div class="${cls}">${msg}</div>`;
+}
+
+function mostrarDados() {
+  const raw = localStorage.getItem('enjoy_pedidos');
+  const el = document.getElementById('resultado');
+  el.style.display = 'block';
+  if (!raw || raw === '[]') {
+    el.style.color = '#e07070';
+    el.textContent = 'Nenhum dado encontrado no armazenamento local deste dispositivo.';
+  } else {
+    el.style.color = '#6dcc6d';
+    el.textContent = raw;
+  }
+}
+
+async function recuperar() {
+  document.querySelector('button').disabled = true;
+  document.getElementById('status').innerHTML = '';
+
+  const raw = localStorage.getItem('enjoy_pedidos');
+
+  if (!raw || raw === '[]') {
+    log('❌ Nenhum dado local encontrado neste dispositivo.', 'err');
+    log('Tente abrir esta página no iPad onde o staff estava aberto.', 'info');
+    document.querySelector('button').disabled = false;
+    return;
+  }
+
+  let pedidos;
+  try {
+    pedidos = JSON.parse(raw);
+    log(`✓ Encontrados ${pedidos.length} pedidos localmente!`, 'ok');
+  } catch(e) {
+    log('❌ Erro ao ler dados locais.', 'err');
+    document.querySelector('button').disabled = false;
+    return;
+  }
+
+  log('Enviando para a nuvem...', 'info');
+
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': KEY },
+      body: JSON.stringify({ pedidos })
+    });
+
+    if (res.ok) {
+      log(`✅ ${pedidos.length} pedidos restaurados com sucesso!`, 'ok');
+      log('Abra o staff.html e o relatório para confirmar.', 'info');
+    } else {
+      log('❌ Erro ao salvar na nuvem. Tente novamente.', 'err');
+    }
+  } catch(e) {
+    log('❌ Erro de conexão: ' + e.message, 'err');
+  }
+
+  document.querySelector('button').disabled = false;
+}
+</script>
+</body>
+</html>
