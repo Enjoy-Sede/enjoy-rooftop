@@ -338,7 +338,7 @@
     const pendentes = pedidos.filter(p => p.status === 'pendente').length;
     const confirmados = pedidos.filter(p => p.status === 'confirmado').length;
     const entregues = pedidos.filter(p => p.status === 'entregue').length;
-    const total = pedidos.reduce((s, p) => s + (p.total || 0), 0);
+    const total = pedidos.filter(p => p.status !== 'cancelado').reduce((s, p) => s + (p.total || 0), 0);
 
     document.getElementById('statsBar').innerHTML = `
       <div class="stat-card">
