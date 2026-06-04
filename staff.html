@@ -388,7 +388,8 @@
       } else if (p.status === 'confirmado') {
         actions = `<button class="action-btn action-entregar" onclick="mudarStatus(${p.id}, 'entregue')">Entregue ✓</button>`;
       } else if (p.status === 'entregue') {
-        actions = `<span class="badge badge-green">Entregue</span>`;
+        actions = `<span class="badge badge-green">Entregue</span>
+        <button class="action-btn action-cancelar" onclick="mudarStatus(${p.id}, 'cancelado')">Cancelar</button>`;
       } else if (p.status === 'cancelado') {
         actions = `<span class="badge badge-red">Cancelado</span>`;
       }
