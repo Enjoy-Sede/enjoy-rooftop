@@ -274,20 +274,31 @@
     const total = pedidos.reduce((s, p) => s + (p.total || 0), 0);
     const pessoas = new Set(pedidos.map(p => p.nome)).size;
     const itensTotal = pedidos.reduce((s, p) => s + p.itens.reduce((ss, i) => ss + i.qty, 0), 0);
-    const ambientes = new Set(pedidos.map(p => p.ambiente)).size;
+
+    // Group by person to check paid status
+    const map = {};
+    pedidos.forEach(p => {
+      if (!map[p.nome]) map[p.nome] = { total: 0, pago: false };
+      map[p.nome].total += p.total || 0;
+      if (p.pago) map[p.nome].pago = true;
+    });
+    const totalPago = Object.values(map).filter(p => p.pago).reduce((s,p) => s + p.total, 0);
+    const totalAberto = Object.values(map).filter(p => !p.pago).reduce((s,p) => s + p.total, 0);
+    const qtdPagos = Object.values(map).filter(p => p.pago).length;
+    const qtdAbertos = Object.values(map).filter(p => !p.pago).length;
 
     document.getElementById('summaryGrid').innerHTML = `
       <div class="summary-card">
         <div class="summary-val">${formatMoney(total)}</div>
-        <div class="summary-lbl">Faturamento Total</div>
+        <div class="summary-lbl">Total Geral</div>
       </div>
-      <div class="summary-card">
-        <div class="summary-val">${pedidos.length}</div>
-        <div class="summary-lbl">Total de Pedidos</div>
+      <div class="summary-card" style="border-color:rgba(80,180,80,0.3)">
+        <div class="summary-val" style="color:#6dcc6d;">${formatMoney(totalPago)}</div>
+        <div class="summary-lbl">Recebido (${qtdPagos} pessoas)</div>
       </div>
-      <div class="summary-card">
-        <div class="summary-val">${pessoas}</div>
-        <div class="summary-lbl">Pessoas Atendidas</div>
+      <div class="summary-card" style="border-color:rgba(180,60,60,0.3)">
+        <div class="summary-val" style="color:#e07070;">${formatMoney(totalAberto)}</div>
+        <div class="summary-lbl">Em Aberto (${qtdAbertos} pessoas)</div>
       </div>
       <div class="summary-card">
         <div class="summary-val">${itensTotal}</div>
