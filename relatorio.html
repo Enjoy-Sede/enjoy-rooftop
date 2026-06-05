@@ -449,8 +449,9 @@
     // by person
     const map = {};
     pedidos.forEach(p => {
-      if (!map[p.nome]) map[p.nome] = { ambiente: p.ambiente, itens: {}, total: 0 };
+      if (!map[p.nome]) map[p.nome] = { ambiente: p.ambiente, itens: {}, total: 0, pago: false, formaPagamento: null };
       map[p.nome].total += p.total || 0;
+      if (p.pago) { map[p.nome].pago = true; map[p.nome].formaPagamento = p.formaPagamento || null; }
       p.itens.forEach(i => {
         const k = i.nome + (i.subtipo ? ` (${i.subtipo})` : '');
         if (!map[p.nome].itens[k]) map[p.nome].itens[k] = { qty: 0, subtotal: 0 };
@@ -461,7 +462,8 @@
 
     txt += 'POR PESSOA\n' + '-'.repeat(40) + '\n';
     Object.entries(map).forEach(([nome, data]) => {
-      txt += `\n${nome} — ${data.ambiente}\n`;
+      const statusPag = data.pago ? `PAGO (${data.formaPagamento || '—'})` : 'EM ABERTO';
+      txt += `\n${nome} — ${data.ambiente} — ${statusPag}\n`;
       Object.entries(data.itens).forEach(([item, d]) => {
         txt += `  ${item}: x${d.qty} — ${formatMoney(d.subtotal)}\n`;
       });
@@ -469,8 +471,15 @@
     });
 
     const total = pedidos.reduce((s, p) => s + (p.total || 0), 0);
+    const totalPago = Object.values(map).filter(p => p.pago).reduce((s,p) => s+p.total, 0);
+    const totalAberto = Object.values(map).filter(p => !p.pago).reduce((s,p) => s+p.total, 0);
+    const qtdPagos = Object.values(map).filter(p => p.pago).length;
+    const qtdAbertos = Object.values(map).filter(p => !p.pago).length;
+
     txt += '\n' + '='.repeat(40) + '\n';
-    txt += `TOTAL GERAL: ${formatMoney(total)}\n`;
+    txt += `TOTAL GERAL:   ${formatMoney(total)}\n`;
+    txt += `RECEBIDO:      ${formatMoney(totalPago)} (${qtdPagos} pessoas)\n`;
+    txt += `EM ABERTO:     ${formatMoney(totalAberto)} (${qtdAbertos} pessoas)\n`;
 
     const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
     const a = document.createElement('a');
